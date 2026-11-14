@@ -4,7 +4,7 @@ Alle nennenswerten Änderungen an TaskReset. Das Format folgt [Keep a Changelog]
 
 All notable changes to TaskReset. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.0.0] – 2026-11-14
 
 ### Neu
 
@@ -22,4 +22,4 @@ All notable changes to TaskReset. The format follows [Keep a Changelog](https://
 - Messages in the Windows Event Log (Application log, source `TaskReset`).
 - Scripts to install and uninstall the service.
 
-[Unreleased]: https://github.com/vulture20/TaskReset/commits/main
+[1.0.0]: https://github.com/vulture20/TaskReset/releases/tag/v1.0.0
