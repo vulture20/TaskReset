@@ -40,6 +40,19 @@ if (-not (Test-Path -LiteralPath $config)) {
     throw "appsettings.json nicht gefunden: $config"
 }
 
+# Die framework-abhängige exe ist klein und braucht die .NET 10 Runtime, die self-contained-Variante nicht.
+if ((Get-Item -LiteralPath $ExePath).Length -lt 20MB) {
+    $runtimes = @()
+    if (Get-Command dotnet -ErrorAction SilentlyContinue) {
+        $runtimes = @(& dotnet --list-runtimes 2>$null | Where-Object { $_ -match '^Microsoft\.NETCore\.App 10\.' })
+    }
+    if ($runtimes.Count -eq 0) {
+        throw ("Diese TaskReset.exe ist die framework-abhängige Variante und braucht die .NET 10 Runtime (x64), " +
+               "die auf diesem Rechner fehlt. Entweder die Runtime installieren " +
+               "(https://dotnet.microsoft.com/download/dotnet/10.0) oder das self-contained-ZIP verwenden.")
+    }
+}
+
 if (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) {
     throw "Der Dienst $serviceName ist bereits installiert. Zum Aktualisieren erst .\uninstall.ps1 ausführen."
 }
@@ -61,6 +74,25 @@ Write-Host "Dienst $serviceName installiert ($ExePath)."
 if ($LASTEXITCODE -ne 0) { Write-Warning "Wiederherstellungsoptionen konnten nicht gesetzt werden (sc.exe: $LASTEXITCODE)." }
 
 if (-not $NoStart) {
-    Start-Service -Name $serviceName
+    $startTime = Get-Date
+    try {
+        Start-Service -Name $serviceName -ErrorAction Stop
+    }
+    catch {
+        Write-Warning "Der Dienst $serviceName ist installiert, ließ sich aber nicht starten: $($_.Exception.Message)"
+        Start-Sleep -Seconds 2
+        $events = Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = $startTime.AddSeconds(-5) } -ErrorAction SilentlyContinue |
+            Where-Object { $_.ProviderName -in $eventSource, '.NET Runtime', 'Application Error' } |
+            Select-Object -First 5
+        if ($events) {
+            Write-Host "Letzte Meldungen in der Ereignisanzeige:"
+            $events | Format-List TimeCreated, ProviderName, Id, Message | Out-String -Width 200 | Write-Host
+        }
+        else {
+            Write-Host "Keine passenden Meldungen in der Ereignisanzeige. Zum Testen die exe direkt starten: & `"$ExePath`""
+        }
+        Write-Host "Nach dem Beheben der Ursache: Start-Service $serviceName"
+        exit 1
+    }
     Write-Host "Dienst $serviceName gestartet. Meldungen stehen in der Ereignisanzeige unter Windows-Protokolle > Anwendung, Quelle $eventSource."
 }

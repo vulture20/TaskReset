@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an TaskReset. Das Format folgt [Keep a Changelog]
 
 All notable changes to TaskReset. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] – 2026-11-14
+
+### Geändert
+
+- `install.ps1` bricht mit einem klaren Hinweis ab, wenn die framework-abhängige Variante installiert werden soll, aber die .NET 10 Runtime fehlt.
+- Lässt sich der Dienst nach der Installation nicht starten, zeigt `install.ps1` die passenden Meldungen aus der Ereignisanzeige an.
+
+### Changed
+
+- `install.ps1` stops with a clear message if the framework-dependent variant is installed but the .NET 10 Runtime is missing.
+- If the service fails to start after installation, `install.ps1` shows the related Event Log messages.
+
 ## [1.0.0] – 2026-11-14
 
 ### Neu
@@ -22,4 +34,5 @@ All notable changes to TaskReset. The format follows [Keep a Changelog](https://
 - Messages in the Windows Event Log (Application log, source `TaskReset`).
 - Scripts to install and uninstall the service.
 
+[1.0.1]: https://github.com/vulture20/TaskReset/releases/tag/v1.0.1
 [1.0.0]: https://github.com/vulture20/TaskReset/releases/tag/v1.0.0
